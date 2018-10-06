@@ -1,6 +1,6 @@
 import re
-
-
+import time
+from urllib.parse import urlencode
 
 import scrapy
 from bs4 import BeautifulSoup
@@ -15,13 +15,16 @@ from bs4 import BeautifulSoup
 # USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'
 # 需要将COOKIES_ENABLED 解开注释，并且设置为false
 # ROBOTSTXT_OBEY = False
+from selenium import webdriver
+from selenium.webdriver import DesiredCapabilities
+
 from ..items import GuaziItem
 
 
 class AppleCrawler(scrapy.Spider):
     name = 'guazi_chongqing'
     start_urls = ['https://www.guazi.com/cq/buy']
-    cookie = 'uuid=c3dc641b-ec74-4a80-e7c6-70045b14a042; ganji_uuid=1065676098741256031061; Hm_lvt_936a6d5df3f3d309bda39e92da3dd52f=1536594080,1537775020; clueSourceCode=10103000312%2300; antipas=y9xS07g36A678X12Y6B9884019088; sessionid=48ec8f7b-db4c-4bfa-fa39-df4ea1b80198; lg=1; cainfo=%7B%22ca_s%22%3A%22pz_baidu%22%2C%22ca_n%22%3A%22tbmkbturl%22%2C%22ca_i%22%3A%22-%22%2C%22ca_medium%22%3A%22-%22%2C%22ca_term%22%3A%22-%22%2C%22ca_content%22%3A%22-%22%2C%22ca_campaign%22%3A%22-%22%2C%22ca_kw%22%3A%22-%22%2C%22keyword%22%3A%22-%22%2C%22ca_keywordid%22%3A%22-%22%2C%22scode%22%3A%2210103000312%22%2C%22ca_transid%22%3Anull%2C%22platform%22%3A%221%22%2C%22version%22%3A1%2C%22ca_b%22%3A%22-%22%2C%22ca_a%22%3A%22-%22%2C%22display_finance_flag%22%3A%22-%22%2C%22client_ab%22%3A%22-%22%2C%22guid%22%3A%22c3dc641b-ec74-4a80-e7c6-70045b14a042%22%2C%22sessionid%22%3A%2248ec8f7b-db4c-4bfa-fa39-df4ea1b80198%22%7D; close_finance_popup=2018-10-05; cityDomain=cq; preTime=%7B%22last%22%3A1538723695%2C%22this%22%3A1536594147%2C%22pre%22%3A1536594147%7D; _gl_tracker=%7B%22ca_source%22%3A%22-%22%2C%22ca_name%22%3A%22-%22%2C%22ca_kw%22%3A%22-%22%2C%22ca_id%22%3A%22-%22%2C%22ca_s%22%3A%22self%22%2C%22ca_n%22%3A%22-%22%2C%22ca_i%22%3A%22-%22%2C%22sid%22%3A56686227431%7D',
+    cookie = "antipas=8085n76T1192364859r85425;"
     userAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
 
     # custom_settings = {'DOWNLOAD_DELAY': 2}
@@ -29,26 +32,35 @@ class AppleCrawler(scrapy.Spider):
     # 新加的代码
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url,
-                                 headers={
-                                     'Cookie': self.cookie,
-                                     'User-Agent': self.userAgent
-                                 })
+            headers = {
+                'Cookie': self.cookie,
+                'User-Agent': self.userAgent
+            }
+            yield scrapy.Request(url, headers=headers)
+
+    def getCookie(self):
+        cap = DesiredCapabilities.PHANTOMJS.copy()
+        cap["phantomjs.page.settings.userAgent"] = self.userAgent
+        driver = webdriver.PhantomJS(executable_path="./script/phantomjs.exe", desired_capabilities=cap)
+        driver.get(self.start_urls[0])
+
+        mycookie = driver.execute_script('return document.cookie;')
+        return mycookie
 
     def parse(self, response):
         res = BeautifulSoup(response.body)
         domain = "https://www.guazi.com"
-        print('共%s', len(res.select('.carlist a')))
+        headers = {
+            'Cookie': self.cookie,
+            'User-Agent': self.userAgent
+        }
         for carItem in res.select('.carlist a')[:2]:
             print(carItem.attrs["href"])
             # print(carItem.select('h2')[0].text)
             href = domain + carItem.attrs["href"]
             yield scrapy.Request(href,
                                  self.parseDetail,
-                                 headers={
-                                     'Cookie': self.cookie,
-                                     'User-Agent': self.userAgent
-                                 },
+                                 headers=headers,
                                  meta={})
 
     def parseDetail(self, response):
