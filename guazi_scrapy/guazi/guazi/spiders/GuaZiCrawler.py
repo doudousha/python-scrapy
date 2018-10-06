@@ -24,13 +24,14 @@ from ..items import GuaziItem
 class AppleCrawler(scrapy.Spider):
     name = 'guazi_chongqing'
     start_urls = ['https://www.guazi.com/cq/buy']
-    cookie = "antipas=8085n76T1192364859r85425;"
+    cookie = "antipas=80H857611qn92364O859S85425;"
     userAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
-
+    # cookie = ''
     # custom_settings = {'DOWNLOAD_DELAY': 2}
     #
     # 新加的代码
     def start_requests(self):
+        # self.cookie = self.getCookie()
         for url in self.start_urls:
             headers = {
                 'Cookie': self.cookie,
@@ -54,7 +55,7 @@ class AppleCrawler(scrapy.Spider):
             'Cookie': self.cookie,
             'User-Agent': self.userAgent
         }
-        for carItem in res.select('.carlist a')[:2]:
+        for carItem in res.select('.carlist a'):
             print(carItem.attrs["href"])
             # print(carItem.select('h2')[0].text)
             href = domain + carItem.attrs["href"]
@@ -127,11 +128,55 @@ class AppleCrawler(scrapy.Spider):
 
         # 底盘及制动
 
-        # 安全配置
+        for trItem in tables[2].select('tr'):
+            self.commonSet(item, trItem.text, 'chassis_drivingMode', r'驱动方式\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_typeOfSupport', r'助力类型\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_frontSuspension', r'前悬挂类型\(Ps\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_rearSuspension', r'后悬挂类型\(N\*m\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_frontBrake', r'前制动类型\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_rearBrake', r'后制动类型\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_parkingBrakeType', r'驻车制动类型\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_parkingBrakeType', r'前轮胎规格\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'chassis_rearTireSpecification', r'后轮胎规格\s*(.+)\s*')
 
-        # 外部配置
+        ####################  安全配置   ###################
 
-        # 内部配置
+        for trItem in tables[3].select('tr'):
+            self.commonSet(item, trItem.text, 'security_principalAndAssistant', r'主副驾驶安全气囊\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_roundSide', r'前后排侧气囊\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_roundHead', r'前后排头部气囊\(Ps\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_tirePressureDetection', r'胎压检测\(N\*m\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_internalControlLock', r'车内中控锁\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_childSeat', r'儿童座椅接口\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_keylessStartUp', r'无钥匙启动\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_antiLockBrakingSystem', r'防抱死系统\(ABS\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_vehicleStabilityControlSystem', r'车身稳定控制\(ESP\)\s*(.+)\s*')
+
+
+        ####### 外部配置 ##########
+        for trItem in tables[4].select('tr'):
+            self.commonSet(item, trItem.text, 'outer_electricSkylight', r'电动天窗\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'outer_panoramicSunroof', r'全景天窗\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'outer_electricallyOperatedSuctionDoor', r'电动吸合门\(Ps\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'outer_speechTrunk', r'感应后备箱\(N\*m\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'outer_inductionWiper', r'感应雨刷\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'outer_rearWiper', r'后雨刷\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_keylessStartUp', r'前后电动车窗\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_antiLockBrakingSystem', r'后视镜电动调节\(ABS\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'security_vehicleStabilityControlSystem', r'后视镜加热\(ESP\)\s*(.+)\s*')
+
+        ########## 内部配置   #######
+        for trItem in tables[5].select('tr'):
+            self.commonSet(item, trItem.text, 'internal_multifunctionalSteeringWheel', r'多功能方向盘\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_cruiseControl', r'定速巡航\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_airConditioner', r'空调\(Ps\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_automaticAirConditioning', r'自动空调\(N\*m\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_gps', r'GPS导航\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_PDCParkingDistanceControl', r'倒车雷达\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_rearCameraParkingAid', r'倒车影像系统\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_leatherSeat', r'真皮座椅\(ABS\)\s*(.+)\s*')
+            self.commonSet(item, trItem.text, 'internal_frontAndRearSeatHeating', r'前后排座椅加热\(ESP\)\s*(.+)\s*')
+
         print(item)
         return item
 

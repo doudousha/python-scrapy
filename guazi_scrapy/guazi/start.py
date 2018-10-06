@@ -24,20 +24,20 @@ cmdline.execute("scrapy crawl guazi_chongqing".split())
 # str = "最大扭矩(N*m) 23  "
 # temp =re.match(r'最大扭矩\(N\*m\)\s*(.+)\s*',str)
 # print(temp )
-# from selenium import webdriver
-# from urllib3._collections import HTTPHeaderDict
-# from urllib.parse import urlencode
-#
-# # 使用copy()防止修改原代码定义dict
-# cap = DesiredCapabilities.PHANTOMJS.copy()
-# cap["phantomjs.page.settings.userAgent"] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
-# driver = webdriver.PhantomJS(executable_path="./script/phantomjs.exe",desired_capabilities=cap)
-# # driver.get("https://www.guazi.com/")
-# driver.get("https://www.guazi.com/cq/buy")
-# data = driver.get_cookies()
-# mycookie =driver.execute_script('return document.cookie;')
-# print(mycookie)
-# print(data)
-# print(driver.page_source)
+from selenium import webdriver
+from urllib3._collections import HTTPHeaderDict
+from urllib.parse import urlencode
+
+# 使用copy()防止修改原代码定义dict
+cap = DesiredCapabilities.PHANTOMJS.copy()
+cap["phantomjs.page.settings.userAgent"] = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
+driver = webdriver.PhantomJS(executable_path="./script/phantomjs.exe",desired_capabilities=cap)
+# driver.get("https://www.guazi.com/")
+driver.get("https://www.guazi.com/cq/buy")
+data = driver.get_cookies()
+mycookie =driver.execute_script('return document.cookie;')
+print(mycookie)
+print(data)
+print(driver.page_source)
 # #
 # # # requests.get("https://www.guazi.com/cq/buy")
