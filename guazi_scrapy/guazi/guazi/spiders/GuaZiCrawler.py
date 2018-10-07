@@ -24,14 +24,13 @@ from ..items import GuaziItem
 class AppleCrawler(scrapy.Spider):
     name = 'guazi_chongqing'
     start_urls = ['https://www.guazi.com/cq/buy']
-    cookie = "antipas=80H857611qn92364O859S85425;"
     userAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
-    # cookie = ''
+    cookie = ''
     # custom_settings = {'DOWNLOAD_DELAY': 2}
     #
     # 新加的代码
     def start_requests(self):
-        # self.cookie = self.getCookie()
+        self.cookie = self.getCookie()
         for url in self.start_urls:
             headers = {
                 'Cookie': self.cookie,
@@ -42,7 +41,7 @@ class AppleCrawler(scrapy.Spider):
     def getCookie(self):
         cap = DesiredCapabilities.PHANTOMJS.copy()
         cap["phantomjs.page.settings.userAgent"] = self.userAgent
-        driver = webdriver.PhantomJS(executable_path="./script/phantomjs.exe", desired_capabilities=cap)
+        driver = webdriver.PhantomJS(executable_path="./../script/phantomjs.exe", desired_capabilities=cap)
         driver.get(self.start_urls[0])
 
         mycookie = driver.execute_script('return document.cookie;')

@@ -25,3 +25,4 @@
 /.nb-gradle/
 /whl/*
 /env/*
+/script/
