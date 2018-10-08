@@ -78,9 +78,11 @@ UAPOOL = [
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'guazi.pipelines.GuaziPipeline': 300,
-# }
+ITEM_PIPELINES = {
+   'guazi.pipelines.GuaziPipeline': 300,
+}
+#分配给每个类的整型值，确定了他们运行的顺序，item按数字从低到高的顺序，
+# 通过pipeline，通常将这些数字定义在0-1000范围内（0-1000随意设置，数值越低，组件的优先级越高）
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
