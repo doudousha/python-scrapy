@@ -1,4 +1,6 @@
-from sqlalchemy import Column, String, Integer
+import datetime
+
+from sqlalchemy import Column, String, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -154,3 +156,5 @@ class GuaZiDetail(Base):
     internal_leatherSeat = Column(String(128))
     # 前后排座椅加热
     internal_frontAndRearSeatHeating = Column(String(128))
+    # 创建时间
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
