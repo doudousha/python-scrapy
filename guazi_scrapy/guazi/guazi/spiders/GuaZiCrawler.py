@@ -2,6 +2,7 @@ import re
 import time
 from urllib.parse import urlencode
 
+import requests
 import scrapy
 from bs4 import BeautifulSoup
 
@@ -23,14 +24,19 @@ from ..items import GuaziItem
 
 class AppleCrawler(scrapy.Spider):
     name = 'guazi_chongqing'
+    startUrl = 'https://www.guazi.com/cq/buy'
     start_urls = ['https://www.guazi.com/cq/buy']
     userAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
     cookie = ''
-    # custom_settings = {'DOWNLOAD_DELAY': 2}
+    custom_settings = {'DOWNLOAD_DELAY': 2}
+
     #
     # 新加的代码
     def start_requests(self):
-        self.cookie = self.getCookie()
+        pageResult = self.getPageResult()
+        self.cookie = pageResult['cookie']
+        self.start_urls = [('{0}/o{1}'.format(self.startUrl, i)) for i in range(1, pageResult['maxPage'])]
+        print('self.start_urls %s' % self.start_urls)
         for url in self.start_urls:
             headers = {
                 'Cookie': self.cookie,
@@ -38,14 +44,19 @@ class AppleCrawler(scrapy.Spider):
             }
             yield scrapy.Request(url, headers=headers)
 
-    def getCookie(self):
+    def getPageResult(self):
         cap = DesiredCapabilities.PHANTOMJS.copy()
         cap["phantomjs.page.settings.userAgent"] = self.userAgent
         driver = webdriver.PhantomJS(executable_path="./../script/phantomjs.exe", desired_capabilities=cap)
-        driver.get(self.start_urls[0])
+        driver.get(self.startUrl)
 
         mycookie = driver.execute_script('return document.cookie;')
-        return mycookie
+        res = BeautifulSoup(driver.page_source)
+        print('-----------%s' % res.select('.pageLink')[0].text)
+
+        maxPage = re.match(r'.*\.\.\.\s*(\d+)', res.select('.pageLink')[0].text)[1]
+        print('maxpage - %s' % maxPage)
+        return {'cookie': mycookie, 'maxPage': int(maxPage)}
 
     def parse(self, response):
         res = BeautifulSoup(response.body)
@@ -150,7 +161,6 @@ class AppleCrawler(scrapy.Spider):
             self.commonSet(item, trItem.text, 'security_keylessStartUp', r'无钥匙启动\s*(.+)\s*')
             self.commonSet(item, trItem.text, 'security_antiLockBrakingSystem', r'防抱死系统\(ABS\)\s*(.+)\s*')
             self.commonSet(item, trItem.text, 'security_vehicleStabilityControlSystem', r'车身稳定控制\(ESP\)\s*(.+)\s*')
-
 
         ####### 外部配置 ##########
         for trItem in tables[4].select('tr'):

@@ -1,28 +1,8 @@
-/target/
-!.mvn/wrapper/maven-wrapper.jar
+预发布
+连锁店管理 http://wallet.aumoce.com/manage/qrcodeApplyMapping/walletQrcodeApplyMapping/index.html
+推广码管理 http://wallet.aumoce.com/manage/qrcodePromote/walletQrcodePromote/index.html
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/build/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-/whl/*
-/env/*
-/script/
+正式
+连锁店管理 http://wallet.cnvex.cn/manage/qrcodeApplyMapping/walletQrcodeApplyMapping/index.html
+推广码管理 http://wallet.cnvex.cn/manage/qrcodePromote/walletQrcodePromote/index.html
