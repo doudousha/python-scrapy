@@ -23,12 +23,13 @@ from ..items import GuaziItem
 
 class AppleCrawler(scrapy.Spider):
     name = 'guazi_chongqing'
-    start_urls = ['https://www.guazi.com/cq/buy']
+    startUrl = 'https://www.guazi.com/cq/buy'
+    start_urls = []
+    domain = "https://www.guazi.com"
     userAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36'
     cookie = ''
-    custom_settings = {'DOWNLOAD_DELAY': 2}
-
-
+    headers = {}
+    custom_settings = {'DOWNLOAD_DELAY': 1}
     # custom_settings = {'DOWNLOAD_DELAY': 2}
     #
     # 新加的代码
@@ -37,12 +38,12 @@ class AppleCrawler(scrapy.Spider):
         self.cookie = pageResult['cookie']
         self.start_urls = [('{0}/o{1}'.format(self.startUrl, i)) for i in range(1, pageResult['maxPage'])]
         print('self.start_urls %s' % self.start_urls)
+        self.headers = {
+            'Cookie': self.cookie,
+            'User-Agent': self.userAgent
+        }
         for url in self.start_urls:
-            headers = {
-                'Cookie': self.cookie,
-                'User-Agent': self.userAgent
-            }
-            yield scrapy.Request(url, headers=headers)
+            yield scrapy.Request(url, headers=self.headers)
 
     def getPageResult(self):
         cap = DesiredCapabilities.PHANTOMJS.copy()
@@ -50,28 +51,19 @@ class AppleCrawler(scrapy.Spider):
         driver = webdriver.PhantomJS(executable_path="./../script/phantomjs.exe", desired_capabilities=cap)
         driver.get(self.startUrl)
 
-        mycookie = driver.execute_script('return document.cookie;')
+        cookie = driver.execute_script('return document.cookie;')
         res = BeautifulSoup(driver.page_source)
-        print('-----------%s' % res.select('.pageLink')[0].text)
-
         maxPage = re.match(r'.*\.\.\.\s*(\d+)', res.select('.pageLink')[0].text)[1]
-        print('maxpage - %s' % maxPage)
-        return {'cookie': mycookie, 'maxPage': int(maxPage)}
+        return {'cookie': cookie, 'maxPage': int(maxPage)}
 
     def parse(self, response):
         res = BeautifulSoup(response.body)
-        domain = "https://www.guazi.com"
-        headers = {
-            'Cookie': self.cookie,
-            'User-Agent': self.userAgent
-        }
+
         for carItem in res.select('.carlist a'):
-            print(carItem.attrs["href"])
-            # print(carItem.select('h2')[0].text)
-            href = domain + carItem.attrs["href"]
+            href = "{0}{1}".format(self.domain, carItem.attrs["href"])
             yield scrapy.Request(href,
                                  self.parseDetail,
-                                 headers=headers,
+                                 headers=self.headers,
                                  meta={})
 
     def parseDetail(self, response):
@@ -190,6 +182,6 @@ class AppleCrawler(scrapy.Spider):
         return item
 
     def commonSet(self, item, text, prop, rex):
-        parttenResult = re.match(rex, text)
-        if (parttenResult is not None):
-            item[prop] = parttenResult[1]
+        patternResult = re.match(rex, text)
+        if (patternResult is not None):
+            item[prop] = patternResult[1]

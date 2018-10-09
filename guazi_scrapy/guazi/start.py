@@ -1,8 +1,9 @@
 
 from scrapy import cmdline
 
-cmdline.execute("scrapy crawl guazi_chongqing".split())
-
+# cmdline.execute("scrapy crawl guazi_chongqing ".split())
+# 启动分段爬虫任务
+cmdline.execute("scrapy crawl guazi_chongqing -s JOBDIR=job1".split())
 
 # 1.contents[0] 和text 区别
 # 如果一个标签里面还有子标签，当调用text 获取的会包含子标签内容，
